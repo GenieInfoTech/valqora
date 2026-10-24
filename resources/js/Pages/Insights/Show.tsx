@@ -27,7 +27,7 @@ export default function InsightsShow({ article, relatedArticles = [] }: Insights
             name: 'VALQORA Global Trading LLC',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://valqora.com/images/valqora-logo.jpg',
+                url: 'https://valqora.com/images/valqora-logo.png',
             },
         },
     };

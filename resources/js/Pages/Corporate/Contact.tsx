@@ -1,292 +1,498 @@
-import React from 'react';
-import { useForm, usePage } from '@inertiajs/react';
-import { AppLayout } from '@/Layouts/AppLayout';
-import { PageProps } from '@/types';
+import React, { useEffect } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import AppLayout from '@/Layouts/AppLayout';
 import {
     MapPin,
     Phone,
     Mail,
     Clock,
-    Send,
+    MessageSquare,
+    Video,
     ShieldCheck,
     CheckCircle2,
     Building2,
-    Globe,
+    Warehouse,
+    AlertCircle,
+    Send,
 } from 'lucide-react';
 
 export default function Contact() {
-    const { auth, ports } = usePage<PageProps>().props;
-
-    const { data, setData, post, processing, reset, errors, wasSuccessful } = useForm({
-        inquiry_type: 'general',
-        name: auth.user?.name || '',
-        email: auth.user?.email || '',
-        phone: auth.user?.phone || '',
-        company_name: auth.user?.company_name || '',
-        country: auth.user?.country || '',
-        destination_port: '',
+    const { data, setData, post, processing, errors, wasSuccessful, reset } = useForm({
+        name: '',
+        company: '',
+        email: '',
+        phone: '',
+        country: '',
+        inquiry_type: 'Sales',
+        preferred_contact_method: 'Email',
+        industry: 'Automotive Dealership',
+        fleet_size: '1–5 Units',
+        purchase_intention: 'Immediate Stock Acquisition',
+        vehicle_type: 'JDM Passenger / Hybrid',
+        purchase_timeline: 'Within 30 Days',
+        consultation_date: '',
         subject: '',
         message: '',
+        consent: true,
     });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const dept = params.get('department');
+            const subj = params.get('subject');
+            if (dept) setData('inquiry_type', dept);
+            if (subj) setData('subject', subj);
+        }
+    }, []);
+
+    const departments = [
+        { name: 'Sales', email: 'sales@valqora.com', sla: '< 2 Hours', desc: 'Vehicle reservations, proforma quotations & CIF pricing' },
+        { name: 'Global Trading', email: 'trading@valqora.com', sla: '< 4 Hours', desc: 'Multi-sector procurement & industrial equipment' },
+        { name: 'Export Support', email: 'logistics@valqora.com', sla: '< 2 Hours', desc: 'Bills of Lading, JEVIC/JAAI certificates & customs' },
+        { name: 'Dealer Relations', email: 'dealers@valqora.com', sla: '< 4 Hours', desc: 'Wholesale pricing, container booking & credit lines' },
+        { name: 'Supplier Relations', email: 'suppliers@valqora.com', sla: '< 8 Hours', desc: 'Auction house, fleet & inspection partner onboarding' },
+        { name: 'Corporate Office', email: 'corporate@valqora.com', sla: '< 8 Hours', desc: 'Executive partnerships, banking & investor relations' },
+        { name: 'Media', email: 'press@valqora.com', sla: '< 12 Hours', desc: 'Press releases, brand assets & speaking inquiries' },
+        { name: 'Careers', email: 'careers@valqora.com', sla: '< 24 Hours', desc: 'Global talent acquisition & graduate programs' },
+    ];
 
     const offices = [
         {
+            type: 'Global Headquarters',
             city: 'Tokyo, Japan',
-            title: 'Global Headquarters & Auto Export Desk',
-            address: 'Roppongi Hills Mori Tower, 6-10-1 Roppongi, Minato-ku, Tokyo 105-0001',
-            phone: '+81 3 5555 0192',
-            email: 'tokyo.desk@valqora.com',
-            hours: '09:00 - 18:00 JST (Mon - Fri)',
+            address: 'Marunouchi Trust Tower Main, 1-8-3 Marunouchi, Chiyoda-ku, Tokyo 100-0005',
+            phone: '+81 3-6214-8800',
+            hours: '09:00–18:00 JST (UTC+9)',
+            ports: 'Yokohama, Chiba, Kawasaki',
         },
         {
+            type: 'Middle East & Africa Hub',
             city: 'Dubai, UAE',
-            title: 'Middle East & GCC Commercial Hub',
-            address: 'DIFC Gate Precinct 4, Level 5, Trade Centre, Dubai, UAE',
-            phone: '+971 4 390 1284',
-            email: 'dubai.desk@valqora.com',
-            hours: '09:00 - 18:00 GST (Sun - Thu)',
+            address: 'Gate Village Building 04, Level 3, DIFC, P.O. Box 506680, Dubai',
+            phone: '+971 4-512-9400',
+            hours: '09:00–18:00 GST (UTC+4)',
+            ports: 'Jebel Ali Free Zone (JAFZA)',
         },
         {
+            type: 'European Operations Hub',
             city: 'Frankfurt, Germany',
-            title: 'European Luxury & Fleet Logistics',
-            address: 'Westhafen Tower, Speicherstraße 55, 60327 Frankfurt am Main, Germany',
-            phone: '+49 69 9500 812',
-            email: 'frankfurt.desk@valqora.com',
-            hours: '08:30 - 17:30 CET (Mon - Fri)',
+            address: 'Taunusturm, Taunustor 1, 60310 Frankfurt am Main, Germany',
+            phone: '+49 69-2474-8100',
+            hours: '09:00–18:00 CET (UTC+1)',
+            ports: 'Bremerhaven, Rotterdam, Antwerp',
         },
         {
+            type: 'Asia-Pacific Treasury & Tech',
             city: 'Singapore',
-            title: 'Asia-Pacific Maritime Charter Operations',
-            address: 'Marina Bay Financial Centre Tower 1, 8 Marina Blvd, Singapore 018981',
-            phone: '+65 6820 9100',
-            email: 'singapore.desk@valqora.com',
-            hours: '09:00 - 18:00 SGT (Mon - Fri)',
+            address: ' Marina Bay Financial Centre Tower 2, 10 Marina Blvd, Singapore 018983',
+            phone: '+65 6818-5200',
+            hours: '09:00–18:00 SGT (UTC+8)',
+            ports: 'Jurong, Pasir Panjang',
         },
+    ];
+
+    const warehouses = [
+        { code: 'VGT-WH-YOK', name: 'Yokohama Daikoku Export Terminal & Pre-Export QC Center', capacity: '450 Vehicles • ISO 9001' },
+        { code: 'VGT-WH-KOB', name: 'Kobe Rokko Island Bonded Consolidation Yard', capacity: '280 Vehicles • Container Stuffing' },
+        { code: 'VGT-WH-NAG', name: 'Nagoya Tobishima Industrial & Heavy Machinery Depot', capacity: '320 Units • Flat-Rack & Ro-Ro' },
     ];
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/inquiries', {
-            onSuccess: () => reset(),
+        const enrichedMessage = `[Lead Qualification — Industry: ${data.industry} | Fleet Size: ${data.fleet_size} | Intention: ${data.purchase_intention} | Vehicle Type: ${data.vehicle_type} | Timeline: ${data.purchase_timeline} | Preferred Contact: ${data.preferred_contact_method}${data.consultation_date ? ' | Video Consultation: ' + data.consultation_date : ''}]\n\n${data.message}`;
+        post('/contact', {
+            preserveScroll: true,
+            onSuccess: () => reset('message', 'subject'),
         });
     };
 
     return (
-        <AppLayout
-            title="Global Trade Desks & Direct Inquiries"
-            description="Contact VALQORA international corporate offices in Tokyo, Dubai, Frankfurt, and Singapore for vehicle sourcing, dealer contracts, and consignment directives."
-        >
-            <div className="bg-[#111111] py-16 border-b border-[#222226]">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <span className="text-xs font-mono font-bold tracking-[0.2em] uppercase text-[#C9A227]">
-                        WORLDWIDE DIRECTORY & CONTACT
-                    </span>
-                    <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-1">
-                        Global Trade Desks
-                    </h1>
-                    <p className="text-sm sm:text-base text-gray-400 mt-3 max-w-2xl mx-auto leading-relaxed">
-                        Connect with our licensed trade directors across key financial hubs for vehicle procurement, wholesale allocations, and maritime chartering.
-                    </p>
-                </div>
-            </div>
+        <AppLayout>
+            <Head title="Contact Global Trade Desk & Lead Qualification" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                    {/* Left 6 Cols: Regional Offices */}
-                    <div className="lg:col-span-6 space-y-6">
-                        <h2 className="text-xl font-bold text-white tracking-wide">
-                            International Operating Hubs
-                        </h2>
-
-                        <div className="grid grid-cols-1 gap-4">
-                            {offices.map((off, idx) => (
-                                <div
-                                    key={idx}
-                                    className="p-6 rounded-xl bg-[#161618] border border-[#26262B] hover:border-[#C9A227]/40 transition space-y-3"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-base font-bold text-white">{off.city}</h3>
-                                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#1C1C20] text-[#C9A227] border border-[#2E2E34]">
-                                            TRADE DESK
-                                        </span>
-                                    </div>
-                                    <p className="text-xs font-semibold text-gray-300">{off.title}</p>
-                                    <p className="text-xs text-gray-400 leading-relaxed flex items-start gap-2">
-                                        <MapPin className="w-3.5 h-3.5 text-[#C9A227] flex-shrink-0 mt-0.5" />
-                                        <span>{off.address}</span>
-                                    </p>
-                                    <div className="pt-2 border-t border-[#222226] flex flex-wrap gap-4 text-xs text-gray-400">
-                                        <span className="flex items-center gap-1.5">
-                                            <Phone className="w-3.5 h-3.5 text-[#C9A227]" />
-                                            {off.phone}
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                            <Mail className="w-3.5 h-3.5 text-[#C9A227]" />
-                                            {off.email}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
+            {/* Header */}
+            <section className="pt-28 pb-14 bg-[#111111] border-b border-[#2D2D2D] vq-grid-bg">
+                <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20">
+                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                        <div className="max-w-3xl">
+                            <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#C9A227] block mb-3">
+                                Volume 5 Page 15 • Smart Routing & Lead Qualification
+                            </span>
+                            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+                                Every Inquiry Deserves Confidence.
+                            </h1>
+                            <p className="text-lg text-[#9CA3AF]">
+                                Connect directly with our 8 specialized departments across Tokyo, Dubai, Frankfurt, and Singapore. Every inquiry receives immediate confirmation and an assigned account representative.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <a
+                                href="https://wa.me/81362148800"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#2E8B57] text-white text-xs font-mono font-bold hover:opacity-90 transition-opacity"
+                            >
+                                <MessageSquare className="w-4 h-4" />
+                                Live WhatsApp Business Desk
+                            </a>
+                            <a
+                                href="tel:+81362148800"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs font-mono hover:border-[#C9A227]"
+                            >
+                                <Phone className="w-4 h-4 text-[#C9A227]" />
+                                +81 3-6214-8800 (24/7 Emergency)
+                            </a>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    {/* Right 6 Cols: Direct Lead Ingestion Form */}
-                    <div className="lg:col-span-6">
-                        <div className="p-8 rounded-2xl bg-[#161618] border border-[#26262B] shadow-2xl">
-                            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#C9A227]">
-                                DIRECT INTAKE DESK
-                            </span>
-                            <h2 className="text-xl font-bold text-white mt-1">Transmit Commercial Directive</h2>
-                            <p className="text-xs text-gray-400 mt-1 mb-6">
-                                All submissions are routed directly to the regional specialist and governed by strict confidentiality.
-                            </p>
+            {/* 8 Contact Departments Selector */}
+            <section className="py-12 bg-[#161616] border-b border-[#2D2D2D]">
+                <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20">
+                    <h2 className="text-xs font-mono uppercase tracking-wider text-[#9CA3AF] mb-4">
+                        Select Department for Smart Routing (8 Official Desks)
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {departments.map((dept) => {
+                            const active = data.inquiry_type === dept.name;
+                            return (
+                                <button
+                                    key={dept.name}
+                                    type="button"
+                                    onClick={() => setData('inquiry_type', dept.name)}
+                                    className={`text-left p-4 rounded-xl border transition-all ${
+                                        active
+                                            ? 'bg-[#C9A227]/15 border-[#C9A227] text-white'
+                                            : 'bg-[#111111] border-[#2D2D2D] text-[#9CA3AF] hover:border-[#5A5F66]'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className="font-bold text-sm text-white">{dept.name}</span>
+                                        <span className="text-[10px] font-mono text-[#C9A227]">{dept.sla}</span>
+                                    </div>
+                                    <p className="text-xs text-[#9CA3AF] line-clamp-1 mb-1">{dept.desc}</p>
+                                    <span className="text-[11px] font-mono text-[#6B7280]">{dept.email}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
 
-                            {wasSuccessful ? (
-                                <div className="p-8 text-center bg-[#111112] border border-[#2E2E34] rounded-xl space-y-3">
-                                    <CheckCircle2 className="w-10 h-10 text-[#C9A227] mx-auto animate-bounce" />
-                                    <h4 className="text-base font-bold text-white">Directive Transmitted</h4>
-                                    <p className="text-xs text-gray-400 max-w-sm mx-auto">
-                                        Your commercial inquiry has been logged. An assigned trade director will follow up within 4 business hours.
+            {/* Main Form + Global Offices */}
+            <section className="py-16 bg-[#111111]">
+                <div className="max-w-[1440px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    {/* Left: Enterprise Lead Qualification & Inquiry Form */}
+                    <div className="lg:col-span-7 bg-[#1A1A1A] border border-[#2D2D2D] rounded-2xl p-8 md:p-10">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#2D2D2D]">
+                            <div>
+                                <span className="text-xs font-mono text-[#C9A227] uppercase block">
+                                    Routing To: {data.inquiry_type} Department
+                                </span>
+                                <h2 className="text-2xl font-bold text-white">
+                                    Direct Procurement & Consultation Request
+                                </h2>
+                            </div>
+                            <Video className="w-6 h-6 text-[#C9A227]" />
+                        </div>
+
+                        {wasSuccessful && (
+                            <div className="mb-6 p-4 rounded-xl bg-[#2E8B57]/15 border border-[#2E8B57] text-white flex items-start gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-[#2E8B57] shrink-0 mt-0.5" />
+                                <div className="text-sm">
+                                    <div className="font-bold">Inquiry Confirmed & Assigned</div>
+                                    <p className="text-xs text-[#D1D5DB] mt-0.5">
+                                        Your request has been routed to the {data.inquiry_type} desk. An account representative will respond within our guaranteed SLA window.
                                     </p>
                                 </div>
-                            ) : (
-                                <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                        Full Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                        placeholder="e.g., Marcus Vance"
+                                        className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                    />
+                                    {errors.name && <p className="text-xs text-[#C62828] mt-1">{errors.name}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                        Company / Organization
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.company}
+                                        onChange={(e) => setData('company', e.target.value)}
+                                        placeholder="e.g., Pacific Prestige Imports Pty Ltd"
+                                        className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                        Corporate Email *
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        placeholder="name@company.com"
+                                        className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                    />
+                                    {errors.email && <p className="text-xs text-[#C62828] mt-1">{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                        Phone / WhatsApp *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={data.phone}
+                                        onChange={(e) => setData('phone', e.target.value)}
+                                        placeholder="+61 400 000 000"
+                                        className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                        Destination Country *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={data.country}
+                                        onChange={(e) => setData('country', e.target.value)}
+                                        placeholder="e.g., Australia, UAE, UK"
+                                        className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Lead Qualification Block (Vol 5 p. 252) */}
+                            <div className="p-5 rounded-xl bg-[#111111] border border-[#2D2D2D] space-y-4">
+                                <div className="text-xs font-mono uppercase tracking-wider text-[#C9A227]">
+                                    Lead Qualification & Procurement Profile
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
-                                        <label className="block text-gray-300 font-medium mb-1">Inquiry Classification *</label>
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Industry Sector
+                                        </label>
                                         <select
-                                            value={data.inquiry_type}
-                                            onChange={(e) => setData('inquiry_type', e.target.value)}
-                                            className="w-full px-3 py-2.5 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
+                                            value={data.industry}
+                                            onChange={(e) => setData('industry', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
                                         >
-                                            <option value="general">General Commercial Inquiries</option>
-                                            <option value="dealership_application">B2B Dealership / Wholesale Allocation</option>
-                                            <option value="consignment">Vehicle Consignment / Supplier Listing</option>
-                                            <option value="investor">Corporate Investor Relations</option>
+                                            <option>Automotive Dealership</option>
+                                            <option>Commercial Fleet Operator</option>
+                                            <option>Import Distributor</option>
+                                            <option>Construction / Industrial</option>
+                                            <option>Government / Diplomatic</option>
+                                            <option>Private Executive Buyer</option>
                                         </select>
                                     </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Authorized Contact *</label>
-                                            <input
-                                                type="text"
-                                                required
-                                                value={data.name}
-                                                onChange={(e) => setData('name', e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            />
-                                            {errors.name && <p className="text-rose-500 text-[11px] mt-1">{errors.name}</p>}
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Corporate Email *</label>
-                                            <input
-                                                type="email"
-                                                required
-                                                value={data.email}
-                                                onChange={(e) => setData('email', e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            />
-                                            {errors.email && <p className="text-rose-500 text-[11px] mt-1">{errors.email}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Phone / WhatsApp</label>
-                                            <input
-                                                type="text"
-                                                value={data.phone}
-                                                onChange={(e) => setData('phone', e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Company / Entity</label>
-                                            <input
-                                                type="text"
-                                                value={data.company_name}
-                                                onChange={(e) => setData('company_name', e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Country</label>
-                                            <input
-                                                type="text"
-                                                value={data.country}
-                                                onChange={(e) => setData('country', e.target.value)}
-                                                placeholder="e.g. United Arab Emirates"
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-gray-300 font-medium mb-1">Primary Port of Interest</label>
-                                            <select
-                                                value={data.destination_port}
-                                                onChange={(e) => setData('destination_port', e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                            >
-                                                <option value="">Select Discharge Port</option>
-                                                {ports.map((p) => (
-                                                    <option key={p.code} value={p.name}>
-                                                        {p.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
                                     <div>
-                                        <label className="block text-gray-300 font-medium mb-1">Subject *</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={data.subject}
-                                            onChange={(e) => setData('subject', e.target.value)}
-                                            placeholder="e.g. Allocation of 5 Units Lexus LX600 VIP"
-                                            className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227]"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-gray-300 font-medium mb-1">Message & Commercial Terms *</label>
-                                        <textarea
-                                            required
-                                            rows={4}
-                                            value={data.message}
-                                            onChange={(e) => setData('message', e.target.value)}
-                                            className="w-full px-3 py-2 bg-[#111112] border border-[#2A2A2E] text-white rounded-lg outline-none focus:border-[#C9A227] resize-none"
-                                        />
-                                        {errors.message && <p className="text-rose-500 text-[11px] mt-1">{errors.message}</p>}
-                                    </div>
-
-                                    <div className="pt-2 flex items-center justify-between">
-                                        <span className="text-[11px] text-gray-500 flex items-center gap-1.5">
-                                            <ShieldCheck className="w-3.5 h-3.5 text-[#C9A227]" />
-                                            AML & KYC compliant transmission.
-                                        </span>
-
-                                        <button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="px-6 py-2.5 bg-[#C9A227] hover:bg-[#dfba38] text-black font-bold text-xs uppercase tracking-wider rounded-lg transition flex items-center gap-2 shadow"
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Expected Fleet / Order Volume
+                                        </label>
+                                        <select
+                                            value={data.fleet_size}
+                                            onChange={(e) => setData('fleet_size', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
                                         >
-                                            <Send className="w-3.5 h-3.5" />
-                                            <span>{processing ? 'Transmitting...' : 'Send Directive'}</span>
-                                        </button>
+                                            <option>1–5 Units</option>
+                                            <option>6–20 Units (Container Load)</option>
+                                            <option>21–50 Units (Fleet Allocation)</option>
+                                            <option>50+ Units (Institutional Contract)</option>
+                                        </select>
                                     </div>
-                                </form>
-                            )}
+                                    <div>
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Purchase Timeline
+                                        </label>
+                                        <select
+                                            value={data.purchase_timeline}
+                                            onChange={(e) => setData('purchase_timeline', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
+                                        >
+                                            <option>Immediate (Within 14 Days)</option>
+                                            <option>Within 30 Days</option>
+                                            <option>1–3 Months (Quarterly Pipeline)</option>
+                                            <option>Long-Term Partnership Inquiry</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Vehicle / Product Category
+                                        </label>
+                                        <select
+                                            value={data.vehicle_type}
+                                            onChange={(e) => setData('vehicle_type', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
+                                        >
+                                            <option>JDM Passenger / Hybrid</option>
+                                            <option>European Luxury / Executive</option>
+                                            <option>Commercial Vans & Trucks</option>
+                                            <option>SUV & 4WD Off-Road</option>
+                                            <option>Heavy Industrial Machinery</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Preferred Contact Method
+                                        </label>
+                                        <select
+                                            value={data.preferred_contact_method}
+                                            onChange={(e) => setData('preferred_contact_method', e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
+                                        >
+                                            <option>Email</option>
+                                            <option>WhatsApp Business</option>
+                                            <option>Direct Phone Call</option>
+                                            <option>Video Consultation (Zoom/Teams)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-mono text-[#9CA3AF] mb-1">
+                                            Optional Video Call Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={data.consultation_date}
+                                            onChange={(e) => setData('consultation_date', e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg bg-[#1A1A1A] border border-[#2D2D2D] text-white text-xs"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                    Subject / Reference (Stock No., VIN, or Tender ID)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.subject}
+                                    onChange={(e) => setData('subject', e.target.value)}
+                                    placeholder="e.g., CIF Quotation for 4x Toyota Land Cruiser 300 to Brisbane"
+                                    className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-mono uppercase text-[#9CA3AF] mb-1.5">
+                                    Detailed Requirements & Specifications *
+                                </label>
+                                <textarea
+                                    rows={4}
+                                    required
+                                    value={data.message}
+                                    onChange={(e) => setData('message', e.target.value)}
+                                    placeholder="Specify target models, model years, auction grade requirements (e.g., Grade 4.5+), Incoterms (FOB/CIF), and port of discharge..."
+                                    className="w-full px-4 py-3 rounded-lg bg-[#111111] border border-[#2D2D2D] text-white text-sm focus:border-[#C9A227] focus:outline-none"
+                                />
+                                {errors.message && <p className="text-xs text-[#C62828] mt-1">{errors.message}</p>}
+                            </div>
+
+                            <label className="flex items-start gap-3 text-xs text-[#9CA3AF] cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    required
+                                    checked={data.consent}
+                                    onChange={(e) => setData('consent', e.target.checked)}
+                                    className="mt-0.5 rounded border-[#2D2D2D] bg-[#111111] text-[#C9A227] focus:ring-[#C9A227]"
+                                />
+                                <span>
+                                    I consent to Valqora Global Trading processing my corporate contact details in accordance with its GDPR & international privacy standards.
+                                </span>
+                            </label>
+
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full py-4 bg-[#C9A227] text-[#111111] font-bold text-sm rounded-lg hover:bg-[#d4af37] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                <Send className="w-4 h-4" />
+                                {processing ? 'Routing Inquiry...' : `Submit to ${data.inquiry_type} Desk`}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Right: Global Offices, Warehouses & Emergency Contacts */}
+                    <div className="lg:col-span-5 space-y-6">
+                        <div className="bg-[#1A1A1A] border border-[#2D2D2D] rounded-2xl p-7">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <Building2 className="w-5 h-5 text-[#C9A227]" />
+                                Global Corporate Offices
+                            </h3>
+                            <div className="space-y-5">
+                                {offices.map((off) => (
+                                    <div key={off.city} className="pb-4 border-b border-[#2D2D2D] last:border-none last:pb-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="font-bold text-white text-sm">{off.city}</span>
+                                            <span className="text-[10px] font-mono text-[#C9A227] uppercase">{off.type}</span>
+                                        </div>
+                                        <p className="text-xs text-[#9CA3AF] mb-2">{off.address}</p>
+                                        <div className="flex flex-wrap items-center justify-between text-xs font-mono text-[#D1D5DB] gap-2">
+                                            <span>{off.phone}</span>
+                                            <span className="text-[#6B7280]">{off.hours}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-[#1A1A1A] border border-[#2D2D2D] rounded-2xl p-7">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <Warehouse className="w-5 h-5 text-[#C9A227]" />
+                                Bonded Export Warehouses & Yards
+                            </h3>
+                            <div className="space-y-3">
+                                {warehouses.map((wh) => (
+                                    <div key={wh.code} className="p-3.5 rounded-xl bg-[#111111] border border-[#2D2D2D]">
+                                        <div className="flex items-center justify-between text-xs font-mono mb-1">
+                                            <span className="text-[#C9A227] font-bold">{wh.code}</span>
+                                            <span className="text-[#2E8B57]">{wh.capacity}</span>
+                                        </div>
+                                        <div className="text-xs text-white font-medium">{wh.name}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-[#1A1A1A] border border-[#C9A227]/40 rounded-2xl p-6">
+                            <div className="flex items-center gap-2 text-xs font-mono uppercase text-[#C9A227] mb-2">
+                                <AlertCircle className="w-4 h-4" />
+                                24/7 Port & Customs Emergency Desk
+                            </div>
+                            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-3">
+                                For active shipments requiring urgent Bill of Lading amendments, container seal verification, or port terminal release authorization:
+                            </p>
+                            <div className="text-sm font-mono font-bold text-white">
+                                Hotline: +81 3-6214-8899 • controltower@valqora.com
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </AppLayout>
     );
 }

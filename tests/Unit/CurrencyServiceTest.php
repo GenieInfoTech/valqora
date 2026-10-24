@@ -40,12 +40,14 @@ class CurrencyServiceTest extends TestCase
     public function test_supported_currencies_structure(): void
     {
         $currencies = CurrencyService::getSupportedCurrencies();
-        $this->assertCount(5, $currencies);
+        $this->assertCount(7, $currencies);
         $codes = array_column($currencies, 'code');
         $this->assertContains('USD', $codes);
         $this->assertContains('EUR', $codes);
         $this->assertContains('JPY', $codes);
         $this->assertContains('AED', $codes);
         $this->assertContains('GBP', $codes);
+        $this->assertContains('AUD', $codes);
+        $this->assertContains('BDT', $codes);
     }
 }
