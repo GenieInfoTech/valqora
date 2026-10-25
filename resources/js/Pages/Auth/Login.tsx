@@ -1,32 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm, Link, Head } from '@inertiajs/react';
 import { Logo } from '@/Components/Logo';
-import { Lock, Mail, ArrowRight, Shield, User, CheckCircle2 } from 'lucide-react';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
 
-interface DemoAccount {
-    role: string;
-    email: string;
-    password: string;
-}
-
-interface LoginProps {
-    demoAccounts: DemoAccount[];
-}
-
-export default function Login({ demoAccounts = [] }: LoginProps) {
+export default function Login() {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
         remember: true,
     });
-
-    const handleSelectDemo = (acc: DemoAccount) => {
-        setData({
-            email: acc.email,
-            password: acc.password,
-            remember: true,
-        });
-    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -108,30 +90,7 @@ export default function Login({ demoAccounts = [] }: LoginProps) {
                         </button>
                     </form>
 
-                    {/* Quick One-Click Demo Role Accounts Switcher */}
-                    <div className="pt-4 border-t border-[#222226]">
-                        <p className="text-[11px] uppercase font-bold tracking-wider text-gray-400 mb-2">
-                            Quick Evaluation Credentials:
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            {demoAccounts.map((acc) => (
-                                <button
-                                    key={acc.role}
-                                    type="button"
-                                    onClick={() => handleSelectDemo(acc)}
-                                    className="p-2 rounded bg-[#1C1C20] hover:bg-[#25252B] border border-[#2C2C32] text-left transition"
-                                >
-                                    <p className="font-semibold text-white text-[11px] flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#C9A227]" />
-                                        {acc.role}
-                                    </p>
-                                    <p className="text-[10px] text-gray-400 font-mono truncate">{acc.email}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="text-center text-xs text-gray-400 pt-2">
+                    <div className="pt-4 border-t border-[#222226] text-center text-xs text-gray-400">
                         <span>New trade partner? </span>
                         <Link href="/register" className="text-[#C9A227] hover:underline font-semibold">
                             Apply for Client Portal Access

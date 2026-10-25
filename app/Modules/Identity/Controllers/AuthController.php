@@ -16,14 +16,7 @@ class AuthController extends Controller
 {
     public function showLogin(): Response
     {
-        return Inertia::render('Auth/Login', [
-            'demoAccounts' => [
-                ['role' => 'Administrator', 'email' => 'admin@valqora.com', 'password' => 'Valqora2026!'],
-                ['role' => 'B2B Dealer', 'email' => 'dealer@tokyomotors.jp', 'password' => 'Valqora2026!'],
-                ['role' => 'Private Buyer', 'email' => 'buyer@alrashid-auto.ae', 'password' => 'Valqora2026!'],
-                ['role' => 'Consignor / Supplier', 'email' => 'consignor@globalfleet.de', 'password' => 'Valqora2026!'],
-            ],
-        ]);
+        return Inertia::render('Auth/Login');
     }
 
     public function login(Request $request): RedirectResponse
