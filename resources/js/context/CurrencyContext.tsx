@@ -38,11 +38,11 @@ const normalizeCurrency = (c: any, idx: number): Currency => {
     };
 };
 
-export const CurrencyProvider: React.FC<{ children: ReactNode; initialCurrencies?: Currency[] }> = ({
-    children,
-    initialCurrencies,
-}) => {
-    // Merge backend currencies with enterprise standard currencies (USD, JPY, EUR, AUD, GBP, BDT, AED per Vol 3 p. 150)
+export const CurrencyProvider: React.FC<{
+    children: ReactNode;
+    initialCurrencies?: Currency[];
+    defaultCode?: string;
+}> = ({ children, initialCurrencies, defaultCode }) => {
     const mergedCurrencies = React.useMemo(() => {
         if (!initialCurrencies || !Array.isArray(initialCurrencies) || initialCurrencies.length === 0) {
             return defaultCurrencies;
@@ -61,23 +61,50 @@ export const CurrencyProvider: React.FC<{ children: ReactNode; initialCurrencies
     }, [initialCurrencies]);
 
     const [currencies] = useState<Currency[]>(mergedCurrencies);
-    const [currentCurrencyObj, setCurrentCurrencyObj] = useState<Currency>(
-        currencies.find((c) => c.is_default) || currencies[0] || defaultCurrencies[0]
-    );
+    const [currentCurrencyObj, setCurrentCurrencyObj] = useState<Currency>(() => {
+        if (typeof window !== 'undefined') {
+            const savedCode = localStorage.getItem('valqora_currency');
+            if (savedCode) {
+                const found = mergedCurrencies.find((c) => c.code === savedCode);
+                if (found) return found;
+            }
+        }
+        if (defaultCode) {
+            const foundDefault = mergedCurrencies.find((c) => c.code === defaultCode);
+            if (foundDefault) return foundDefault;
+        }
+        return mergedCurrencies.find((c) => c.is_default) || mergedCurrencies[0] || defaultCurrencies[0];
+    });
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
         const savedCode = localStorage.getItem('valqora_currency');
         if (savedCode) {
             const found = currencies.find((c) => c.code === savedCode);
             if (found) setCurrentCurrencyObj(found);
         }
+
+        const handleCurrencyEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<{ code: string }>;
+            const nextCode = customEvent.detail?.code;
+            if (nextCode) {
+                const found = currencies.find((c) => c.code === nextCode);
+                if (found) setCurrentCurrencyObj(found);
+            }
+        };
+
+        window.addEventListener('valqora-currency-change', handleCurrencyEvent);
+        return () => window.removeEventListener('valqora-currency-change', handleCurrencyEvent);
     }, [currencies]);
 
     const setCurrencyByCode = (code: string) => {
         const found = currencies.find((c) => c.code === code);
         if (found) {
             setCurrentCurrencyObj(found);
-            localStorage.setItem('valqora_currency', code);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('valqora_currency', code);
+                window.dispatchEvent(new CustomEvent('valqora-currency-change', { detail: { code } }));
+            }
         }
     };
 

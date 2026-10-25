@@ -26,6 +26,12 @@ class Article extends Model
         'view_count',
     ];
 
+    protected $appends = [
+        'summary',
+        'read_time',
+        'image',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -35,6 +41,23 @@ class Article extends Model
             'published_at' => 'datetime',
             'view_count' => 'integer',
         ];
+    }
+
+    public function getSummaryAttribute(): string
+    {
+        return (string) ($this->attributes['excerpt'] ?? '');
+    }
+
+    public function getReadTimeAttribute(): string
+    {
+        $mins = (int) ($this->attributes['read_time_minutes'] ?? 5);
+
+        return "{$mins} min read";
+    }
+
+    public function getImageAttribute(): ?string
+    {
+        return $this->attributes['cover_image_url'] ?? null;
     }
 
     public function scopePublished(Builder $query): Builder

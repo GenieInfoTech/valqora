@@ -153,7 +153,7 @@ const WatchlistCompareDrawer: React.FC = () => {
                                                                 {v.year} {v.make} {v.model}
                                                             </Link>
                                                             <span className="text-[11px] font-mono text-gray-400">
-                                                                {v.stock_number}
+                                                                {(v as any).stock_number || v.stock_id}
                                                             </span>
                                                         </div>
                                                     </th>
@@ -165,19 +165,22 @@ const WatchlistCompareDrawer: React.FC = () => {
                                                 <td className="p-3.5 font-semibold text-gray-400 bg-[#141414]">FOB Price (USD)</td>
                                                 {compareVehicles.map((v) => (
                                                     <td key={v.id} className="p-3.5 font-mono font-bold text-[#C9A227] text-sm border-l border-white/10">
-                                                        USD {Number(v.price_usd).toLocaleString()}
+                                                        USD {Number((v as any).price_usd ?? v.fob_price_usd ?? 0).toLocaleString()}
                                                     </td>
                                                 ))}
                                             </tr>
                                             <tr>
                                                 <td className="p-3.5 font-semibold text-gray-400 bg-[#141414]">Auction / Inspection Grade</td>
-                                                {compareVehicles.map((v) => (
-                                                    <td key={v.id} className="p-3.5 font-mono text-white border-l border-white/10">
-                                                        <span className="px-2 py-0.5 bg-[#2E8B57]/20 text-emerald-400 border border-[#2E8B57]/40 rounded">
-                                                            Grade {v.condition_grade || '4.5'} Verified
-                                                        </span>
-                                                    </td>
-                                                ))}
+                                                {compareVehicles.map((v) => {
+                                                    const rawGrade = String(v.condition_grade || '4.5').replace(/^Grade\s+/i, '');
+                                                    return (
+                                                        <td key={v.id} className="p-3.5 font-mono text-white border-l border-white/10">
+                                                            <span className="px-2 py-0.5 bg-[#2E8B57]/20 text-emerald-400 border border-[#2E8B57]/40 rounded">
+                                                                Grade {rawGrade} Verified
+                                                            </span>
+                                                        </td>
+                                                    );
+                                                })}
                                             </tr>
                                             <tr>
                                                 <td className="p-3.5 font-semibold text-gray-400 bg-[#141414]">Mileage</td>
@@ -207,7 +210,7 @@ const WatchlistCompareDrawer: React.FC = () => {
                                                 <td className="p-3.5 font-semibold text-gray-400 bg-[#141414]">Origin Location</td>
                                                 {compareVehicles.map((v) => (
                                                     <td key={v.id} className="p-3.5 text-gray-200 border-l border-white/10">
-                                                        {v.location || v.origin_country} ({v.origin_country})
+                                                        {(v as any).location || v.location_city || v.location_country} ({(v as any).origin_country || v.location_country})
                                                     </td>
                                                 ))}
                                             </tr>
@@ -215,7 +218,7 @@ const WatchlistCompareDrawer: React.FC = () => {
                                                 <td className="p-3.5 font-semibold text-gray-400 bg-[#141414]">VIN / Chassis</td>
                                                 {compareVehicles.map((v) => (
                                                     <td key={v.id} className="p-3.5 font-mono text-gray-300 border-l border-white/10">
-                                                        {v.vin_number || 'Verified on Inspection'}
+                                                        {(v as any).vin_number || v.vin_chassis || 'Verified on Inspection'}
                                                     </td>
                                                 ))}
                                             </tr>
@@ -296,10 +299,10 @@ const WatchlistCompareDrawer: React.FC = () => {
                                                 </button>
                                             </div>
                                             <p className="text-[11px] font-mono text-gray-400 mt-0.5">
-                                                {v.stock_number} • {Number(v.mileage_km).toLocaleString()} km
+                                                {(v as any).stock_number || v.stock_id} • {Number(v.mileage_km).toLocaleString()} km
                                             </p>
                                             <p className="text-sm font-mono font-bold text-[#C9A227] mt-2">
-                                                USD {Number(v.price_usd).toLocaleString()} FOB
+                                                USD {Number((v as any).price_usd ?? v.fob_price_usd ?? 0).toLocaleString()} FOB
                                             </p>
                                             <div className="mt-2 flex items-center gap-3">
                                                 <Link
@@ -455,6 +458,19 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     });
 
     useEffect(() => {
+        if (typeof window === "undefined") return;
+        const onThemeEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<{ theme: "dark" | "light" }>;
+            const next = customEvent.detail?.theme;
+            if ((next === "light" || next === "dark") && next !== theme) {
+                setTheme(next);
+            }
+        };
+        window.addEventListener("valqora-theme-change", onThemeEvent);
+        return () => window.removeEventListener("valqora-theme-change", onThemeEvent);
+    }, [theme]);
+
+    useEffect(() => {
         if (typeof document !== "undefined") {
             const html = document.documentElement;
             if (theme === "light") {
@@ -467,6 +483,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 html.setAttribute("data-theme", "dark");
             }
             localStorage.setItem("valqora_theme", theme);
+            window.dispatchEvent(new CustomEvent("valqora-theme-change", { detail: { theme } }));
         }
     }, [theme]);
 
@@ -503,7 +520,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                                 </button>
                             </div>
                         )}
-                        <main className="flex-grow pt-20">{children}</main>
+                        <main className="flex-grow">{children}</main>
                         <Footer />
                         <WatchlistCompareDrawer />
                         <MobileQuickBarAndFloatingActions />

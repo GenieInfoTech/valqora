@@ -48,6 +48,16 @@ class Vehicle extends Model
         'specifications',
     ];
 
+    protected $appends = [
+        'stock_number',
+        'price_usd',
+        'color',
+        'location',
+        'origin_country',
+        'vin_number',
+        'description',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -63,6 +73,41 @@ class Vehicle extends Model
             'features' => 'array',
             'specifications' => 'array',
         ];
+    }
+
+    public function getStockNumberAttribute(): string
+    {
+        return (string) ($this->attributes['stock_id'] ?? '');
+    }
+
+    public function getPriceUsdAttribute(): float
+    {
+        return (float) ($this->attributes['fob_price_usd'] ?? 0);
+    }
+
+    public function getColorAttribute(): string
+    {
+        return (string) ($this->attributes['exterior_color'] ?? '');
+    }
+
+    public function getLocationAttribute(): string
+    {
+        return (string) ($this->attributes['location_city'] ?? '');
+    }
+
+    public function getOriginCountryAttribute(): string
+    {
+        return (string) ($this->attributes['location_country'] ?? '');
+    }
+
+    public function getVinNumberAttribute(): ?string
+    {
+        return $this->attributes['vin_chassis'] ?? null;
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->attributes['overview'] ?? null;
     }
 
     public function images(): HasMany

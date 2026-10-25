@@ -1,55 +1,159 @@
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-@source '../**/*.tsx';
+@import "tailwindcss";
 
-@theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
+/* ==========================================================================
+   VALQORA GLOBAL TRADING — ENTERPRISE DESIGN TOKENS (VOLUME 3, 4, 5 & 11A)
+   ========================================================================== */
+:root {
     /* Volume 4: Official Master Color Library */
-    --color-valqora-black: #111111;
-    --color-valqora-gold: #C9A227;
-    --color-valqora-gold-hover: #D4AF37;
-    --color-valqora-white: #FFFFFF;
-    --color-valqora-steel: #5A5F66;
-    --color-valqora-light-gray: #E8E9EB;
-    --color-valqora-graphite: #2D2D2D;
+    --vq-black: #111111;
+    --vq-gold: #C9A227;
+    --vq-gold-hover: #D4AF37;
+    --vq-gold-muted: rgba(201, 162, 39, 0.14);
+    --vq-white: #FFFFFF;
+    --vq-steel-gray: #5A5F66;
+    --vq-light-gray: #E8E9EB;
+    --vq-graphite: #2D2D2D;
 
-    /* Volume 4: Approved Accent / Status Colors (<5% composition) */
-    --color-status-success: #2E8B57;
-    --color-status-info: #0057B8;
-    --color-status-warning: #E6A700;
-    --color-status-error: #C62828;
+    /* Volume 4: Neutral Palette */
+    --vq-neutral-100: #FAFAFA;
+    --vq-neutral-200: #F3F4F6;
+    --vq-neutral-300: #E5E7EB;
+    --vq-neutral-400: #D1D5DB;
+    --vq-neutral-500: #9CA3AF;
+    --vq-neutral-600: #6B7280;
+    --vq-neutral-700: #4B5563;
+    --vq-neutral-800: #374151;
+    --vq-neutral-900: #1F2937;
+
+    /* Volume 4: Semantic Accent Colors (<5% composition rule) */
+    --vq-success: #2E8B57;
+    --vq-info: #0057B8;
+    --vq-warning: #E6A700;
+    --vq-error: #C62828;
+
+    /* Volume 9: Motion Identity Standards */
+    --vq-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --vq-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --vq-duration-hover: 120ms;
+    --vq-duration-press: 150ms;
+    --vq-duration-card: 180ms;
+    --vq-duration-modal: 220ms;
+    --vq-duration-page: 250ms;
+
+    /* Dynamic Surface Tokens (Default: Dark Mode) */
+    --vq-surface-primary: #111111;
+    --vq-surface-secondary: #161616;
+    --vq-surface-card: #1A1A1A;
+    --vq-surface-elevated: #222222;
+    --vq-text-primary: #FFFFFF;
+    --vq-text-secondary: #D1D5DB;
+    --vq-text-muted: #9CA3AF;
+    --vq-border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Volume 3: Tabular Numerals for Financial, Auction, VIN, Pricing & Spec Data */
-.tabular-nums,
-table,
-.price-data,
-.spec-number,
-.vin-code {
-    font-variant-numeric: tabular-nums;
+html.light-mode {
+    --vq-surface-primary: #FFFFFF;
+    --vq-surface-secondary: #FAFAFA;
+    --vq-surface-card: #FFFFFF;
+    --vq-surface-elevated: #F3F4F6;
+    --vq-text-primary: #111111;
+    --vq-text-secondary: #374151;
+    --vq-text-muted: #5A5F66;
+    --vq-border-color: #E5E7EB;
 }
 
-/* Volume 2 & 5: Accessibility Focus States (2px Gold Outline) */
-*:focus-visible {
-    outline: 2px solid #C9A227;
-    outline-offset: 2px;
+@layer base {
+    html {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        background-color: var(--vq-surface-primary);
+        color: var(--vq-text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        scroll-behavior: smooth;
+        transition: background-color 200ms ease, color 200ms ease;
+    }
+
+    body {
+        background-color: var(--vq-surface-primary);
+        color: var(--vq-text-primary);
+        overflow-x: hidden;
+        transition: background-color 200ms ease, color 200ms ease;
+    }
+
+    /* Volume 3: Tabular Figures for Financial, Specification & Auction Data */
+    .tabular-nums,
+    table,
+    td,
+    th,
+    .price-display,
+    .metric-value,
+    .spec-number,
+    .font-mono {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Volume 4 Page 20 & Volume 5 Page 35: Accessible Focus States (Gold 2px minimum) */
+    *:focus-visible {
+        outline: 2px solid var(--vq-gold) !important;
+        outline-offset: 2px !important;
+    }
 }
 
-/* Volume 2 Page 21: Subtle VQ Geometric Grid Pattern (5-10% Opacity) */
-.vq-grid-pattern {
+/* ==========================================================================
+   VOLUME 2 PAGE 21: BRAND PATTERN SYSTEM (VQ GRID, TRADE FLOW, GOLD MESH)
+   ========================================================================== */
+.vq-pattern-grid {
     background-image: 
         linear-gradient(45deg, rgba(201, 162, 39, 0.05) 1px, transparent 1px),
         linear-gradient(-45deg, rgba(201, 162, 39, 0.05) 1px, transparent 1px);
     background-size: 32px 32px;
 }
 
-/* Volume 9: Reduced Motion Compliance */
+.vq-pattern-trade-flow {
+    background-image: 
+        radial-gradient(circle at 24px 24px, rgba(201, 162, 39, 0.08) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+html.light-mode .vq-pattern-trade-flow:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-image: 
+        radial-gradient(circle at 24px 24px, rgba(201, 162, 39, 0.14) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(17, 17, 17, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+.vq-pattern-gold-mesh {
+    background-image: radial-gradient(rgba(201, 162, 39, 0.08) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+/* ==========================================================================
+   VOLUME 9: ENTERPRISE MOTION & MICRO-INTERACTIONS
+   ========================================================================== */
+.vq-transition-hover {
+    transition: all var(--vq-duration-hover) var(--vq-ease-out);
+}
+
+.vq-transition-card {
+    transition: transform var(--vq-duration-card) var(--vq-ease-out),
+                box-shadow var(--vq-duration-card) var(--vq-ease-out),
+                border-color var(--vq-duration-card) var(--vq-ease-out),
+                background-color var(--vq-duration-card) var(--vq-ease-out);
+}
+
+.vq-transition-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Volume 9 Page 20: Reduced Motion Accessibility Support */
 @media (prefers-reduced-motion: reduce) {
     *,
     ::before,
@@ -62,115 +166,257 @@ table,
 }
 
 /* ==========================================================================
-   Volume 4 & Volume 11 Phase 9: Complete Light Mode Theme System
+   VOLUME 11: COMPLETE LIGHT MODE / DARK MODE THEME SYSTEM
    ========================================================================== */
 html.light-mode,
 html.light-mode body {
-    background-color: #FAFAFA !important;
-    color: #111111 !important;
-    color-scheme: light;
-}
-
-/* Remap primary dark backgrounds to crisp executive light surfaces */
-html.light-mode .bg-\[\#111111\],
-html.light-mode .bg-\[\#0A0A0A\],
-html.light-mode .bg-\[\#0D0D0D\],
-html.light-mode .bg-\[\#090909\],
-html.light-mode .bg-\[\#0f0f0f\],
-html.light-mode .bg-\[\#0F0F0F\] {
-    background-color: #FAFAFA !important;
-}
-
-html.light-mode .bg-\[\#141414\],
-html.light-mode .bg-\[\#161616\],
-html.light-mode .bg-\[\#181818\],
-html.light-mode .bg-\[\#1A1A1A\],
-html.light-mode .bg-\[\#1C1C1E\],
-html.light-mode .bg-\[\#222222\],
-html.light-mode .bg-\[\#2D2D2D\] {
     background-color: #FFFFFF !important;
-    box-shadow: 0 2px 10px rgba(17, 17, 17, 0.04);
+    color: #111111 !important;
 }
 
-html.light-mode .bg-\[\#111111\]\/95,
-html.light-mode .bg-\[\#111111\]\/90,
-html.light-mode .bg-\[\#0D0D0D\]\/95,
-html.light-mode .bg-\[\#161616\]\/90,
-html.light-mode .bg-\[\#1A1A1A\]\/90 {
-    background-color: rgba(255, 255, 255, 0.95) !important;
+/* Primary Page & Inner Surface Backgrounds in Light Mode -> Crisp White (#FFFFFF) */
+html.light-mode .bg-\[\#050505\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#080808\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0A0A0A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0A0A0C\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0C0C0E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0D0D0D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0D0D0F\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0E0E10\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0E0E12\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#101012\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111111\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111112\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111114\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#121214\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #FFFFFF !important;
+    color: #111111;
 }
 
-/* Remap translucent dark overlays/pills */
-html.light-mode .bg-white\/5,
-html.light-mode .bg-white\/\[0\.02\],
-html.light-mode .bg-white\/\[0\.03\],
-html.light-mode .bg-white\/\[0\.04\],
-html.light-mode .bg-white\/10 {
+html.light-mode .bg-\[\#111111\]\/50:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111111\]\/60:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111111\]\/80:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111111\]\/90:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111111\]\/95:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#111114\]\/90:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#141416\]\/80:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1A1A1A\]\/95:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#0A0A0A\]\/95:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: rgba(255, 255, 255, 0.96) !important;
+    color: #111111;
+}
+
+/* Secondary Section & Card Surfaces in Light Mode -> Subtle Off-White (#F8F9FA) */
+html.light-mode .bg-\[\#141414\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#141416\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#141418\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#151515\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#151518\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#161616\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#161618\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#171717\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#181818\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#18181A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#181820\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #F8F9FA !important;
+    color: #111111;
+}
+
+/* Card & Container Surfaces in Light Mode -> Crisp White / Light Surface */
+html.light-mode .bg-\[\#1A1A1A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1A1A1D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1A1A1E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1B1B1E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1C1C1C\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1C1C1E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1C1C20\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1C1C22\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1E1E1E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1E1E22\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-900:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-900\/50:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-900\/80:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-950:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #F8F9FA !important;
+    color: #111111;
+}
+
+/* Elevated / Pill / Chip Surfaces in Light Mode -> Neutral 200 (#F3F4F6) */
+html.light-mode .bg-\[\#202024\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#202026\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#222222\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#222226\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#222228\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#242424\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#242428\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#24242A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#252528\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#25252B\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#262626\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#26262C\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#2A2A2A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#2D2D2D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#2D2D2D\]\/90:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#1F2937\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-800:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-neutral-800\/50:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #F3F4F6 !important;
+    color: #111111;
+}
+
+/* Dark Gradient Banners -> Light Gradient Banners in Light Mode */
+html.light-mode .from-\[\#1A1A1A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .from-\[\#111111\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-image: linear-gradient(to right, #F8F9FA, #F3F4F6, #F8F9FA) !important;
+    background-color: #F8F9FA !important;
+    color: #111111;
+}
+
+/* Semantic Status Callout Surfaces in Light Mode */
+html.light-mode .bg-\[\#122216\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #ECFDF5 !important;
+    color: #065F46 !important;
+}
+html.light-mode .bg-\[\#291415\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#201416\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#201518\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #FEF2F2 !important;
+    color: #991B1B !important;
+}
+html.light-mode .bg-\[\#181C28\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #EFF6FF !important;
+    color: #1E40AF !important;
+}
+html.light-mode .bg-\[\#1C180E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#222216\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#262414\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-\[\#322f18\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    background-color: #FFFBEB !important;
+    color: #92400E !important;
+}
+
+/* Translucent White Surfaces -> Subtle Dark Surfaces in Light Mode */
+html.light-mode .bg-white\/\[0\.02\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-white\/\[0\.03\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-white\/\[0\.04\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-white\/5:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .bg-white\/10:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     background-color: #F3F4F6 !important;
 }
 
-/* Remap text colors for high WCAG AA contrast in Light Mode */
-html.light-mode .text-white {
+html.light-mode .hover\:bg-white\/5:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-white\/10:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#1A1A1A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#1A1A1D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#202024\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#222222\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#252528\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover,
+html.light-mode .hover\:bg-\[\#2D2D2D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover {
+    background-color: #E5E7EB !important;
+}
+
+/* Text Colors in Light Mode */
+html.light-mode .text-white:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     color: #111111 !important;
 }
 
-html.light-mode .text-neutral-200,
-html.light-mode .text-neutral-300,
-html.light-mode .text-gray-200,
-html.light-mode .text-gray-300 {
+html.light-mode .hover\:text-white:not(.theme-preserve-dark):not(.theme-preserve-dark *):hover {
+    color: #111111 !important;
+}
+
+html.light-mode .text-neutral-100:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-neutral-200:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-gray-100:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-gray-200:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#E8E9EB\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#E8E9EB\]\/90:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#E8E9EB\]\/85:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#E8E9EB\]\/80:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#E5E7EB\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    color: #1F2937 !important;
+}
+
+html.light-mode .text-neutral-300:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-gray-300:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#D1D5DB\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     color: #374151 !important;
 }
 
-html.light-mode .text-neutral-400,
-html.light-mode .text-gray-400 {
+html.light-mode .text-neutral-400:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-gray-400:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-\[\#9CA3AF\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     color: #4B5563 !important;
 }
 
-html.light-mode .text-neutral-500,
-html.light-mode .text-gray-500 {
-    color: #5A5F66 !important;
+html.light-mode .text-neutral-500:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .text-gray-500:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    color: #6B7280 !important;
 }
 
-/* Remap borders for clean structural lines in Light Mode */
-html.light-mode .border-white\/5,
-html.light-mode .border-white\/\[0\.06\],
-html.light-mode .border-white\/\[0\.07\],
-html.light-mode .border-white\/\[0\.08\],
-html.light-mode .border-white\/10,
-html.light-mode .border-white\/15,
-html.light-mode .border-white\/20,
-html.light-mode .border-neutral-800,
-html.light-mode .border-gray-800 {
+/* Deeper Gold for WCAG AA Contrast on Light Surfaces */
+html.light-mode .text-\[\#C9A227\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    color: #9A7611 !important;
+}
+
+/* Borders & Dividers in Light Mode */
+html.light-mode .border-white\/5:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-white\/\[0\.07\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-white\/\[0\.08\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-white\/10:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-white\/15:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-white\/20:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#1A1A1A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#1C1C1C\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#1F1F1F\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#1F1F24\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#222222\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#222226\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#222228\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#242428\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#25252A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#262626\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#26262B\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#28282E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2A2A2A\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2A2A2E\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2A2A30\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2B2B30\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2C2C30\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2C2C32\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2D2D2D\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#2E2E34\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#374151\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#3A3A40\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-\[\#3A3A44\]:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-neutral-800:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-neutral-700:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .border-gray-800:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     border-color: #E5E7EB !important;
 }
 
-/* Form controls (inputs, selects, textareas) in Light Mode */
-html.light-mode input:not([type="checkbox"]):not([type="radio"]),
-html.light-mode select,
-html.light-mode textarea {
+html.light-mode .divide-white\/5:not(.theme-preserve-dark):not(.theme-preserve-dark *) > :not([hidden]) ~ :not([hidden]),
+html.light-mode .divide-white\/10:not(.theme-preserve-dark):not(.theme-preserve-dark *) > :not([hidden]) ~ :not([hidden]),
+html.light-mode .divide-\[\#202024\]:not(.theme-preserve-dark):not(.theme-preserve-dark *) > :not([hidden]) ~ :not([hidden]),
+html.light-mode .divide-neutral-800:not(.theme-preserve-dark):not(.theme-preserve-dark *) > :not([hidden]) ~ :not([hidden]) {
+    border-color: #E5E7EB !important;
+}
+
+/* Form Inputs, Selects & Textareas in Light Mode */
+html.light-mode input:not([type="checkbox"]):not([type="radio"]):not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode select:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode textarea:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
     background-color: #FFFFFF !important;
     color: #111111 !important;
     border-color: #D1D5DB !important;
 }
 
-html.light-mode input::placeholder,
-html.light-mode textarea::placeholder {
-    color: #9CA3AF !important;
+html.light-mode input:not(.theme-preserve-dark):not(.theme-preserve-dark *)::placeholder,
+html.light-mode textarea:not(.theme-preserve-dark):not(.theme-preserve-dark *)::placeholder {
+    color: #6B7280 !important;
 }
 
-/* Keep Gold primary CTA buttons with dark text legible */
-html.light-mode .bg-\[\#C9A227\] {
-    background-color: #C9A227 !important;
-    color: #111111 !important;
-}
-
-/* Preserve dark hero gradient overlays where background photography is used */
-html.light-mode .from-\[\#111111\] {
-    --tw-gradient-from: #FAFAFA var(--tw-gradient-from-position) !important;
-}
-html.light-mode .via-\[\#111111\]\/90 {
-    --tw-gradient-via: rgba(250, 250, 250, 0.92) var(--tw-gradient-via-position) !important;
-}
-html.light-mode .to-\[\#111111\] {
-    --tw-gradient-to: #FAFAFA var(--tw-gradient-to-position) !important;
+/* Card Elevations in Light Mode */
+html.light-mode .shadow-2xl:not(.theme-preserve-dark):not(.theme-preserve-dark *),
+html.light-mode .shadow-xl:not(.theme-preserve-dark):not(.theme-preserve-dark *) {
+    box-shadow: 0 10px 25px -5px rgba(17, 17, 17, 0.06), 0 8px 10px -6px rgba(17, 17, 17, 0.04) !important;
 }

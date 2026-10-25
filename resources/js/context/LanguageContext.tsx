@@ -240,8 +240,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         setLanguageState(code);
         if (typeof window !== 'undefined') {
             localStorage.setItem('valqora_language', code);
+            window.dispatchEvent(new CustomEvent('valqora-language-change', { detail: { code } }));
         }
     };
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const onLangChange = (e: Event) => {
+            const customEvent = e as CustomEvent<{ code: LanguageCode }>;
+            const nextCode = customEvent.detail?.code;
+            if (nextCode && SUPPORTED_LANGUAGES[nextCode]) {
+                setLanguageState(nextCode);
+            }
+        };
+        window.addEventListener('valqora-language-change', onLangChange);
+        return () => window.removeEventListener('valqora-language-change', onLangChange);
+    }, []);
 
     useEffect(() => {
         const config = SUPPORTED_LANGUAGES[language];

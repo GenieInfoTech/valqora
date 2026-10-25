@@ -20,12 +20,18 @@ export interface Port {
     transit_days_from_japan: number;
     standard_roro_freight_usd: number;
     standard_container_freight_usd: number;
+    transit_days?: number;
+    roro_rate_usd?: number;
+    container_rate_usd?: number;
+    inspection_fee_usd?: number;
+    insurance_rate_percent?: number;
 }
 
 export interface VehicleImage {
     id: number;
     vehicle_id: number;
     url: string;
+    alt_text?: string | null;
     caption?: string | null;
     category: string;
     is_primary: boolean;
@@ -54,6 +60,7 @@ export interface VehicleInspection {
 export interface Vehicle {
     id: number;
     stock_id: string;
+    stock_number?: string;
     title: string;
     slug: string;
     make: string;
@@ -69,22 +76,29 @@ export interface Vehicle {
     seats: number;
     mileage_km: number;
     exterior_color: string;
+    color?: string;
     interior_color: string;
     vin_chassis?: string | null;
+    vin_number?: string | null;
     location_country: string;
+    origin_country?: string;
     location_city: string;
+    location?: string;
     fob_price_usd: number;
+    price_usd?: number;
     cif_estimate_usd?: number | null;
     status: 'available' | 'reserved' | 'in_transit' | 'sold';
     condition_grade: string;
     is_featured: boolean;
     is_verified: boolean;
     overview?: string | null;
+    description?: string | null;
     features?: string[] | null;
     specifications?: Record<string, string> | null;
     primary_image?: VehicleImage | null;
     images?: VehicleImage[];
     inspection?: VehicleInspection | null;
+    inspections?: any[];
 }
 
 export interface SourcingRequest {

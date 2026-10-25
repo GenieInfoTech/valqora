@@ -6,7 +6,9 @@ interface WatchlistContextType {
     compareVehicles: Vehicle[];
     isSaved: (id: number) => boolean;
     isComparing: (id: number) => boolean;
+    isCompared: (id: number) => boolean;
     toggleSave: (vehicle: Vehicle) => void;
+    toggleSaved: (vehicle: Vehicle) => void;
     toggleCompare: (vehicle: Vehicle) => void;
     removeSaved: (id: number) => void;
     removeCompare: (id: number) => void;
@@ -119,7 +121,9 @@ export const WatchlistProvider: React.FC<{ children: ReactNode }> = ({ children 
                 compareVehicles,
                 isSaved,
                 isComparing,
+                isCompared: isComparing,
                 toggleSave,
+                toggleSaved: toggleSave,
                 toggleCompare,
                 removeSaved,
                 removeCompare,

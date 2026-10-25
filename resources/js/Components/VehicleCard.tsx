@@ -47,7 +47,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
     return (
         <div className="group bg-[#161618] border border-white/10 rounded-xl overflow-hidden hover:border-[#C9A227]/60 transition-all duration-200 flex flex-col shadow-lg">
             {/* Image Container */}
-            <div className="relative h-56 overflow-hidden bg-[#0D0D0F]">
+            <div className="relative h-56 overflow-hidden bg-[#0D0D0F] theme-preserve-dark">
                 <Link href={`/vehicles/${vehicle.slug}`} className="block w-full h-full">
                     <img
                         src={primaryImage}
@@ -63,7 +63,9 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
                         {statusBadge.label}
                     </span>
                     <span className="bg-[#111111]/90 backdrop-blur-md text-[#C9A227] border border-[#C9A227]/40 text-[10px] font-mono font-bold px-2.5 py-1 rounded">
-                        Grade {vehicle.condition_grade}
+                        {/^grade\s+/i.test(String(vehicle.condition_grade || ''))
+                            ? vehicle.condition_grade
+                            : `Grade ${vehicle.condition_grade || '4.5'}`}
                     </span>
                 </div>
 

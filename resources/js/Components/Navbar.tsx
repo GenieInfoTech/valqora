@@ -58,6 +58,19 @@ export function Navbar({ theme: propTheme, toggleTheme: propToggleTheme }: Navba
     const isLight = activeTheme === 'light';
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const onThemeEvent = (e: Event) => {
+            const customEvent = e as CustomEvent<{ theme: 'dark' | 'light' }>;
+            const next = customEvent.detail?.theme;
+            if ((next === 'light' || next === 'dark') && next !== localTheme) {
+                setLocalTheme(next);
+            }
+        };
+        window.addEventListener('valqora-theme-change', onThemeEvent);
+        return () => window.removeEventListener('valqora-theme-change', onThemeEvent);
+    }, [localTheme]);
+
+    useEffect(() => {
         if (typeof document !== 'undefined') {
             const html = document.documentElement;
             if (activeTheme === 'light') {
@@ -70,6 +83,7 @@ export function Navbar({ theme: propTheme, toggleTheme: propToggleTheme }: Navba
                 html.setAttribute('data-theme', 'dark');
             }
             localStorage.setItem('valqora_theme', activeTheme);
+            window.dispatchEvent(new CustomEvent('valqora-theme-change', { detail: { theme: activeTheme } }));
         }
     }, [activeTheme]);
 
@@ -137,6 +151,12 @@ export function Navbar({ theme: propTheme, toggleTheme: propToggleTheme }: Navba
 
     const isActive = (href: string) => {
         if (href === '/') return url === '/';
+        if (href === '/news' || href === '/insights') {
+            return url.startsWith('/news') || url.startsWith('/insights') || url.startsWith('/global-markets');
+        }
+        if (href === '/vehicles' || href === '/inventory') {
+            return url.startsWith('/vehicles') || url.startsWith('/inventory');
+        }
         return url.startsWith(href);
     };
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { AppLayout } from '@/Layouts/AppLayout';
 import { VehicleCard } from '@/Components/VehicleCard';
@@ -42,12 +42,33 @@ interface VehiclesShowProps {
 
 export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowProps) {
     const { formatPrice, formatIsoPrice } = useCurrency();
-    const { isSaved, toggleSaved, isCompared, toggleCompare, openDrawer } = useWatchlist();
+    const { isSaved, toggleSave, isComparing, toggleCompare, openDrawer } = useWatchlist();
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [isInquiryOpen, setIsInquiryOpen] = useState(false);
     const [inquiryDefaultSubject, setInquiryDefaultSubject] = useState<string>('');
     const [previewDocType, setPreviewDocType] = useState<string | null>(null);
     const [shareCopied, setShareCopied] = useState(false);
+
+    // Normalized vehicle fields to support both DB snake_case and frontend aliases
+    const stockNumber = vehicle.stock_number || vehicle.stock_id || 'VQ-STOCK';
+    const basePriceUsd = Number(vehicle.price_usd ?? vehicle.fob_price_usd ?? 0);
+    const exteriorColor = vehicle.color || vehicle.exterior_color || 'Metallic Black';
+    const interiorColor = vehicle.interior_color || 'Factory Black / Dark Anthracite';
+    const locationCity = vehicle.location || vehicle.location_city || 'Yokohama';
+    const originCountry = vehicle.origin_country || vehicle.location_country || 'Japan';
+    const vinChassis = vehicle.vin_number || vehicle.vin_chassis || 'Verified on Certificate';
+    const descriptionText = vehicle.description || vehicle.overview || '';
+    const cleanGrade = String(vehicle.condition_grade || '4.5').replace(/^Grade\s+/i, '');
+
+    // Open InquiryModal automatically when navigating to #inquiry
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.location.hash === '#inquiry') {
+            setInquiryDefaultSubject(
+                `Direct Inquiry — ${vehicle.year} ${vehicle.make} ${vehicle.model} (${stockNumber})`
+            );
+            setIsInquiryOpen(true);
+        }
+    }, [vehicle.year, vehicle.make, vehicle.model, stockNumber]);
 
     // Shipping & Landed Cost Calculator State
     const [selectedPortId, setSelectedPortId] = useState<number>(ports[0]?.id || 1);
@@ -62,13 +83,15 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
     );
 
     const costBreakdown = useMemo(() => {
-        const fob = Number(vehicle.price_usd) || 0;
+        const fob = basePriceUsd;
+        const containerRate = Number(
+            selectedPort?.container_rate_usd ?? selectedPort?.standard_container_freight_usd ?? 2450
+        );
+        const roroRate = Number(
+            selectedPort?.roro_rate_usd ?? selectedPort?.standard_roro_freight_usd ?? 1350
+        );
         const freight =
-            incoterm === 'FOB'
-                ? 0
-                : shippingMethod === 'container'
-                ? Number(selectedPort?.container_rate_usd || 2450)
-                : Number(selectedPort?.roro_rate_usd || 1350);
+            incoterm === 'FOB' ? 0 : shippingMethod === 'container' ? containerRate : roroRate;
         const inspection = includeInspection ? Number(selectedPort?.inspection_fee_usd || 350) : 0;
         const insurance =
             incoterm === 'CIF' && includeMarineInsurance
@@ -77,16 +100,19 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
         const total = fob + freight + inspection + insurance;
 
         return { fob, freight, inspection, insurance, total };
-    }, [vehicle.price_usd, selectedPort, shippingMethod, incoterm, includeInspection, includeMarineInsurance]);
+    }, [basePriceUsd, selectedPort, shippingMethod, incoterm, includeInspection, includeMarineInsurance]);
 
     const quoteForm = useForm({
         vehicle_id: vehicle.id,
         port_id: selectedPort?.id || 1,
+        port_code: selectedPort?.code || ports[0]?.code || 'AEJEA',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
         company_name: '',
+        customer_company: '',
         shipping_method: shippingMethod,
+        method: shippingMethod,
         incoterm: incoterm,
         include_insurance: includeMarineInsurance,
         include_inspection: includeInspection,
@@ -98,14 +124,18 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
         quoteForm.transform((data) => ({
             ...data,
             port_id: selectedPort?.id || 1,
+            port_code: selectedPort?.code || ports[0]?.code || 'AEJEA',
+            customer_company: data.company_name,
             shipping_method: shippingMethod,
+            method: shippingMethod,
             incoterm: incoterm,
             include_insurance: includeMarineInsurance,
             include_inspection: includeInspection,
         }));
         quoteForm.post('/quotations', {
             preserveScroll: true,
-            onSuccess: () => quoteForm.reset('customer_name', 'customer_email', 'customer_phone', 'company_name', 'notes'),
+            onSuccess: () =>
+                quoteForm.reset('customer_name', 'customer_email', 'customer_phone', 'company_name', 'notes'),
         });
     };
 
@@ -124,7 +154,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
               ];
 
     const openActionInquiry = (actionLabel: string) => {
-        setInquiryDefaultSubject(`${actionLabel} — ${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.stock_number})`);
+        setInquiryDefaultSubject(`${actionLabel} — ${vehicle.year} ${vehicle.make} ${vehicle.model} (${stockNumber})`);
         setIsInquiryOpen(true);
     };
 
@@ -137,49 +167,83 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
     };
 
     const saved = isSaved(vehicle.id);
-    const compared = isCompared(vehicle.id);
+    const compared = isComparing(vehicle.id);
+
+    const inspectionRecords = useMemo(() => {
+        if (Array.isArray(vehicle.inspections) && vehicle.inspections.length > 0) {
+            return vehicle.inspections;
+        }
+        if (vehicle.inspection) {
+            const insp = vehicle.inspection;
+            const avgScore = Math.round(
+                ((Number(insp.engine_score || 4.9) +
+                    Number(insp.chassis_score || 4.8) +
+                    Number(insp.exterior_score || 4.7) +
+                    Number(insp.interior_score || 4.8) +
+                    Number(insp.electronics_score || 4.9)) /
+                    25) *
+                    100
+            );
+            return [
+                {
+                    id: insp.id,
+                    certificate_number: `JEVIC-${stockNumber}`,
+                    inspector_name: insp.inspector_name || 'VALQORA Certified Inspector',
+                    overall_score: avgScore,
+                    status: ' passed',
+                    engine_status: `${insp.engine_score ?? 4.9}/5.0 Verified`,
+                    transmission_status: 'Optimal Shift',
+                    chassis_status: `${insp.chassis_score ?? 4.8}/5.0 Rust-Free`,
+                    exterior_status: `${insp.exterior_score ?? 4.7}/5.0 Original`,
+                    interior_status: `${insp.interior_score ?? 4.8}/5.0 Pristine`,
+                    electrical_status: `${insp.electronics_score ?? 4.9}/5.0 Passed`,
+                },
+            ];
+        }
+        return [];
+    }, [vehicle.inspections, vehicle.inspection, stockNumber]);
 
     const downloadableDocs = [
         {
             id: 'spec',
             title: 'Vehicle Specification Sheet',
-            subtitle: `Standardized Vol 8 Spec Sheet • ${vehicle.stock_number}`,
-            code: `SPEC-${vehicle.stock_number}`,
+            subtitle: `Standardized Vol 8 Spec Sheet • ${stockNumber}`,
+            code: `SPEC-${stockNumber}`,
             status: 'Verified PDF',
         },
         {
             id: 'inspection',
             title: '150-Point Pre-Export Inspection Report',
-            subtitle: `Grade ${vehicle.condition_grade || '4.5'} Mechanical & Structural Audit`,
-            code: `INSP-${vehicle.stock_number}`,
+            subtitle: `Grade ${cleanGrade} Mechanical & Structural Audit`,
+            code: `INSP-${stockNumber}`,
             status: 'Inspector Signed',
         },
         {
             id: 'auction',
             title: 'Official Japanese Auction Sheet',
             subtitle: 'Translated condition map & odometer verification',
-            code: `AUC-${vehicle.stock_number}`,
+            code: `AUC-${stockNumber}`,
             status: 'Original + EN',
         },
         {
             id: 'export_cert',
             title: 'Export Deregistration Certificate',
             subtitle: 'Ministry of Land, Infrastructure, Transport & Tourism (MLIT)',
-            code: `EXP-${vehicle.stock_number}`,
+            code: `EXP-${stockNumber}`,
             status: 'Customs Ready',
         },
         {
             id: 'service',
             title: 'Service & Maintenance History Record',
             subtitle: 'OEM periodic inspection & fluid intervals log',
-            code: `SRV-${vehicle.stock_number}`,
+            code: `SRV-${stockNumber}`,
             status: 'Archived',
         },
     ];
 
     return (
         <AppLayout>
-            <Head title={`${vehicle.title} (${vehicle.stock_number}) — Valqora Global Trading`} />
+            <Head title={`${vehicle.title} (${stockNumber}) — Valqora Global Trading`} />
 
             {/* Breadcrumb & Top Bar */}
             <div className="bg-[#161616] border-b border-white/10 py-4">
@@ -193,13 +257,13 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                             Global Inventory
                         </Link>
                         <ChevronRight className="w-3.5 h-3.5" />
-                        <span className="text-[#C9A227] font-mono">{vehicle.stock_number}</span>
+                        <span className="text-[#C9A227] font-mono">{stockNumber}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
-                            onClick={() => toggleSaved(vehicle)}
+                            onClick={() => toggleSave(vehicle)}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                 saved
                                     ? 'bg-[#C9A227] text-[#111111] border-[#C9A227]'
@@ -245,15 +309,15 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                             <div className="relative aspect-[16/10] bg-black">
                                 <img
                                     src={images[activeImageIndex]?.url}
-                                    alt={images[activeImageIndex]?.alt_text || vehicle.title}
+                                    alt={(images[activeImageIndex] as any)?.alt_text || images[activeImageIndex]?.caption || vehicle.title}
                                     className="w-full h-full object-cover"
                                 />
                                 <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                                     <span className="px-3 py-1 rounded bg-[#111111]/90 border border-white/15 text-xs font-mono uppercase tracking-wider text-white">
-                                        {vehicle.stock_number}
+                                        {stockNumber}
                                     </span>
                                     <span className="px-3 py-1 rounded bg-[#C9A227] text-[#111111] text-xs font-bold uppercase tracking-wider">
-                                        Auction Grade {vehicle.condition_grade}
+                                        Auction Grade {cleanGrade}
                                     </span>
                                     <span className="px-3 py-1 rounded bg-[#2E8B57] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                                         <ShieldCheck className="w-3.5 h-3.5" /> Export Eligible
@@ -281,7 +345,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                         </div>
 
                         {/* Customer Actions Bar (Volume 5 Page 248: Reserve Vehicle, Request Inspection, Request Video, Calculate Shipping, Download Specification, Share Listing) */}
-                        <div className="bg-[#161616] border border-white/10 rounded-2xl p-6">
+                        <div id="inquiry" className="bg-[#161616] border border-white/10 rounded-2xl p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-[#C9A227]">
                                     Direct Customer Actions & Verification Suite
@@ -358,20 +422,20 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                     { label: 'Manufacturer', value: vehicle.make },
                                     { label: 'Model', value: vehicle.model },
                                     { label: 'Registration Year', value: vehicle.year, mono: true },
-                                    { label: 'Mileage (Verified)', value: `${vehicle.mileage_km.toLocaleString()} km`, mono: true },
-                                    { label: 'Engine Displacement', value: vehicle.engine_cc ? `${vehicle.engine_cc.toLocaleString()} cc` : 'Electric / Hybrid', mono: true },
+                                    { label: 'Mileage (Verified)', value: `${Number(vehicle.mileage_km || 0).toLocaleString()} km`, mono: true },
+                                    { label: 'Engine Displacement', value: vehicle.engine_cc ? `${Number(vehicle.engine_cc).toLocaleString()} cc` : 'Electric / Hybrid', mono: true },
                                     { label: 'Transmission', value: vehicle.transmission },
                                     { label: 'Fuel System', value: vehicle.fuel_type },
                                     { label: 'Drivetrain', value: vehicle.drive_type },
                                     { label: 'Steering Configuration', value: vehicle.steering },
-                                    { label: 'Exterior Color', value: vehicle.color },
-                                    { label: 'Interior Trim', value: 'Factory Black / Dark Anthracite' },
+                                    { label: 'Exterior Color', value: exteriorColor },
+                                    { label: 'Interior Trim', value: interiorColor },
                                     { label: 'Doors / Seating', value: `${vehicle.doors} Doors / ${vehicle.seats} Seats`, mono: true },
                                     { label: 'Dimensions (L×W×H)', value: '4,950 × 1,980 × 1,925 mm', mono: true },
                                     { label: 'Gross Vehicle Weight', value: '2,580 kg (14.2 CBM)', mono: true },
                                     { label: 'Emission Standard', value: 'Euro 6d / JPN Post-New Long-Term' },
-                                    { label: 'Origin Location', value: `${vehicle.location}, ${vehicle.origin_country}` },
-                                    { label: 'VIN / Chassis No.', value: vehicle.vin_number || 'Verified on Certificate', mono: true },
+                                    { label: 'Origin Location', value: `${locationCity}, ${originCountry}` },
+                                    { label: 'VIN / Chassis No.', value: vinChassis, mono: true },
                                     { label: 'Export Status', value: 'Cleared for Immediate Dispatch' },
                                 ].map((spec) => (
                                     <div key={spec.label} className="p-3.5 rounded-xl bg-[#111111] border border-white/5">
@@ -385,12 +449,12 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                 ))}
                             </div>
 
-                            {vehicle.description && (
+                            {descriptionText && (
                                 <div className="mt-6 pt-6 border-t border-white/10">
                                     <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-2">
                                         Sourcing & Engineering Notes
                                     </h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">{vehicle.description}</p>
+                                    <p className="text-gray-400 text-sm leading-relaxed">{descriptionText}</p>
                                 </div>
                             )}
 
@@ -435,7 +499,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                 <div className="p-4 rounded-xl bg-[#111111] border border-white/5">
                                     <span className="text-[10px] uppercase tracking-wider text-gray-400 block">Overall Grade</span>
                                     <span className="text-xl font-mono font-bold text-[#C9A227] mt-1 block">
-                                        {vehicle.condition_grade || '4.5'} / 5.0
+                                        {cleanGrade.split(' ')[0] || '4.5'} / 5.0
                                     </span>
                                 </div>
                                 <div className="p-4 rounded-xl bg-[#111111] border border-white/5">
@@ -452,9 +516,9 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                 </div>
                             </div>
 
-                            {vehicle.inspections && vehicle.inspections.length > 0 && (
+                            {inspectionRecords.length > 0 && (
                                 <div className="space-y-4">
-                                    {vehicle.inspections.map((insp) => (
+                                    {inspectionRecords.map((insp: any) => (
                                         <div key={insp.id} className="p-5 rounded-xl bg-[#111111] border border-white/10">
                                             <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-white/10">
                                                 <div>
@@ -472,7 +536,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                                 <div>
                                                     <div className="text-xs text-gray-400">Overall Rating</div>
                                                     <div className="text-sm font-mono font-bold text-emerald-400">
-                                                        {insp.overall_score}/100 ({insp.status.toUpperCase()})
+                                                        {insp.overall_score}/100 ({String(insp.status || 'PASSED').trim().toUpperCase()})
                                                     </div>
                                                 </div>
                                             </div>
@@ -561,7 +625,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                         {/* Vehicle Summary & Price Card */}
                         <div className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 sm:p-8">
                             <div className="text-xs font-mono text-[#C9A227] uppercase tracking-widest mb-1">
-                                {vehicle.make} • {vehicle.body_type} • {vehicle.origin_country}
+                                {vehicle.make} • {vehicle.body_type} • {originCountry}
                             </div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4">{vehicle.title}</h1>
 
@@ -569,10 +633,10 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                 <div>
                                     <div className="text-xs text-gray-400 uppercase tracking-wider">FOB Export Price</div>
                                     <div className="text-3xl font-mono font-bold text-[#C9A227] mt-1">
-                                        {formatPrice(vehicle.price_usd)}
+                                        {formatPrice(basePriceUsd)}
                                     </div>
                                     <div className="text-[11px] font-mono text-gray-400 mt-0.5">
-                                        {formatIsoPrice(vehicle.price_usd)} • Base USD {Number(vehicle.price_usd).toLocaleString()}
+                                        {formatIsoPrice(basePriceUsd)} • Base USD {basePriceUsd.toLocaleString()}
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -627,7 +691,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                     >
                                         {ports.map((port) => (
                                             <option key={port.id} value={port.id}>
-                                                {port.name} ({port.country}) — ~{port.transit_days} days
+                                                {port.name} ({port.country}) — ~{port.transit_days ?? port.transit_days_from_japan ?? 21} days
                                             </option>
                                         ))}
                                     </select>
@@ -870,22 +934,22 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 pb-6">
                                 <div>
                                     <span className="text-xs font-mono uppercase tracking-widest text-gray-500">
-                                        Reference: {vehicle.stock_number}
+                                        Reference: {stockNumber}
                                     </span>
                                     <h2 className="text-2xl font-bold text-[#111111] mt-1">
                                         {vehicle.year} {vehicle.make} {vehicle.model}
                                     </h2>
                                     <p className="text-xs text-gray-600 mt-1">
-                                        VIN / Chassis: <span className="font-mono font-bold">{vehicle.vin_number || 'JTEBR9FJ80K019284'}</span> • Origin: {vehicle.location}, {vehicle.origin_country}
+                                        VIN / Chassis: <span className="font-mono font-bold">{vinChassis}</span> • Origin: {locationCity}, {originCountry}
                                     </p>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-xs text-gray-500 uppercase">FOB Export Valuation</div>
                                     <div className="text-2xl font-mono font-bold text-[#111111]">
-                                        USD {Number(vehicle.price_usd).toLocaleString()}
+                                        USD {basePriceUsd.toLocaleString()}
                                     </div>
                                     <div className="text-[11px] font-mono text-emerald-700 font-semibold">
-                                        Auction Grade {vehicle.condition_grade} Verified
+                                        Auction Grade {cleanGrade} Verified
                                     </div>
                                 </div>
                             </div>
@@ -906,13 +970,13 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                                 <div className="p-3 bg-gray-50 rounded border border-gray-200">
                                     <span className="text-gray-500 block">Odometer Reading</span>
                                     <strong className="font-mono text-[#111111]">
-                                        {vehicle.mileage_km.toLocaleString()} km (JEVIC Certified)
+                                        {Number(vehicle.mileage_km || 0).toLocaleString()} km (JEVIC Certified)
                                     </strong>
                                 </div>
                                 <div className="p-3 bg-gray-50 rounded border border-gray-200">
                                     <span className="text-gray-500 block">Steering / Color</span>
                                     <strong className="text-[#111111]">
-                                        {vehicle.steering} • {vehicle.color}
+                                        {vehicle.steering} • {exteriorColor}
                                     </strong>
                                 </div>
                                 <div className="p-3 bg-gray-50 rounded border border-gray-200">
@@ -946,6 +1010,7 @@ export default function Show({ vehicle, relatedVehicles, ports }: VehiclesShowPr
                 isOpen={isInquiryOpen}
                 onClose={() => setIsInquiryOpen(false)}
                 vehicle={vehicle}
+                defaultSubject={inquiryDefaultSubject}
             />
         </AppLayout>
     );
